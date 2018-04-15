@@ -19,7 +19,7 @@ import simpledb.index.btree.BTreeIndex; //in case we change to btree indexing
  * @author Edward Sciore
  */
 public class IndexInfo {
-   private String idxname, fldname;
+   private String idxname, fldname, indexType;
    private Transaction tx;
    private TableInfo ti;
    private StatInfo si;
@@ -39,14 +39,43 @@ public class IndexInfo {
       ti = SimpleDB.mdMgr().getTableInfo(tblname, tx);
       si = SimpleDB.mdMgr().getStatInfo(tblname, ti, tx);
    }
+
+   /**
+    * Copy of IndexInfo constructor that also saves indexType CS4432
+    * @param idxname Index name
+    * @param tblname Table indexed
+    * @param fldname attribute indexed
+    * @param indexType type of index
+    * @param tx transaction
+    */
+   public IndexInfo(String idxname, String tblname, String fldname, String indexType, Transaction tx) {
+      this.idxname = idxname;
+      this.fldname = fldname;
+      this.indexType = indexType;
+      this.tx = tx;
+      ti = SimpleDB.mdMgr().getTableInfo(tblname, tx);
+      si = SimpleDB.mdMgr().getStatInfo(tblname, ti, tx);
+   }
    
    /**
     * Opens the index described by this object.
     * @return the Index object associated with this information
     */
    public Index open() {
+      System.out.println("Index is probably being created");
       Schema sch = schema();
-      // Create new HashIndex for hash indexing
+      switch(indexType)
+      {
+         case "sh":
+            return new HashIndex(idxname, sch, tx);
+         case "bt":
+            return new BTreeIndex(idxname,sch,tx);
+         case "eh":
+            break; //TODO: this
+         default: //default case really should be an error, but returns a static hash index.  - CS4432
+            return new HashIndex(idxname, sch, tx);
+      }
+      //default case really should be an error, but returns a static hash index. - CS4432
       return new HashIndex(idxname, sch, tx);
    }
    
