@@ -13,7 +13,7 @@ public class CreateStudentDB {
 			stmt.executeUpdate(s);
 			System.out.println("Table STUDENT created.");
 
-			s = "create bt index btStudentTest on STUDENTS (MajorID)";
+			s = "create bt index btStudentTest on STUDENT (MajorID)";
 			stmt.executeUpdate(s);
 			System.out.println("B-Tree Indexed students on major id");
 
