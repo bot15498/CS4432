@@ -62,7 +62,7 @@ public class IndexInfo {
     * @return the Index object associated with this information
     */
    public Index open() {
-      System.out.println("Index is probably being created");
+      System.out.println("Index is probably being created: " + indexType);
       Schema sch = schema();
       switch(indexType)
       {

@@ -83,6 +83,7 @@ public class IndexMgr {
          String idxname = rf.getString("indexname");
          String fldname = rf.getString("fieldname");
          String indexType = rf.getString("indexType"); //Added pulling index type data from rf  - CS4432
+            System.out.println("Obtaining info on: " + idxname +" which is a " + indexType);
          IndexInfo ii = new IndexInfo(idxname, tblname, fldname, indexType, tx);
          result.put(fldname, ii);
       }
