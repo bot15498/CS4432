@@ -48,6 +48,23 @@ public class IndexMgr {
       rf.setString("fieldname", fldname);
       rf.close();
    }
+
+   /** - CS4432
+    * Copy of createIndex that also contains indexType for tracking type of index to create
+    * @param idxname index name
+    * @param tblname indexed table name
+    * @param fldname field which index is on
+    * @param indexType type of index. Either sh (static hash), bt (B-Tree), or eh (extensive hash)
+    * @param tx the calling transaction
+    */
+   public void createIndex(String idxname, String tblname, String fldname, String indexType, Transaction tx) {
+      RecordFile rf = new RecordFile(ti, tx);
+      rf.insert();
+      rf.setString("indexname", idxname);
+      rf.setString("tablename", tblname);
+      rf.setString("fieldname", fldname);
+      rf.close();
+   }
    
    /**
     * Returns a map containing the index info for all indexes

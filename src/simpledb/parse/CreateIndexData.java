@@ -5,7 +5,7 @@ package simpledb.parse;
  * @author Edward Sciore
  */
 public class CreateIndexData {
-   private String idxname, tblname, fldname, indexType;
+   private String idxname, tblname, fldname, indexType; //added attribute for inde type
    
    /**
     * Saves the table and field names of the specified index.
@@ -23,7 +23,7 @@ public class CreateIndexData {
       this.idxname = idxname;
       this.tblname = tblname;
       this.fldname = fldname;
-      this.indexType = indexType;
+      this.indexType = indexType; //added attribute for inde type - CS4432
    }
    
    /**

@@ -114,7 +114,7 @@ public class IndexUpdatePlanner implements UpdatePlanner {
    }
    
    public int executeCreateIndex(CreateIndexData data, Transaction tx) {
-      SimpleDB.mdMgr().createIndex(data.indexName(), data.tableName(), data.fieldName(), tx);
+      SimpleDB.mdMgr().createIndex(data.indexName(), data.tableName(), data.fieldName(), data.getIndexType(), tx); //Added index type -CS4432
       return 0;
    }
 }
