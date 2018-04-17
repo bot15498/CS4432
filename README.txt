@@ -7,3 +7,5 @@ Task 1:
 Task 2:
 -static hash and B-Tree already exist
 -
+-TableInfo for "hash" part of index
+-New class for each bucket. Bucket's hold a table scan.
