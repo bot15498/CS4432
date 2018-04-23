@@ -1,28 +1,27 @@
 package simpledb.index.ehash;
 
 import simpledb.query.Constant;
+import simpledb.record.RID;
 
+/**
+ * Extra class that simulates what's in a record for the Extensible Hash Index
+ */
 public class ExtensibleHashBucketRecord {
 
-    private int block;
-    private int id;
     private Constant dataval;
+    private RID rid;
 
-    public ExtensibleHashBucketRecord(int block, int id, Constant dataval) {
-        this.block = block;
-        this.id = id;
+    public ExtensibleHashBucketRecord(Constant dataval, RID rid) {
         this.dataval = dataval;
-    }
-
-    public int getBlock() {
-        return block;
-    }
-
-    public int getId() {
-        return id;
+        this.rid = rid;
     }
 
     public Constant getDataval() {
+
         return dataval;
+    }
+
+    public RID getRid() {
+        return rid;
     }
 }
