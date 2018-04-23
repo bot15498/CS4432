@@ -2,6 +2,8 @@ package simpledb.metadata;
 
 import static java.sql.Types.INTEGER;
 import static simpledb.file.Page.BLOCK_SIZE;
+
+import simpledb.index.ehash.ExtensibleHashIndex;
 import simpledb.server.SimpleDB;
 import simpledb.tx.Transaction;
 import simpledb.record.*;
@@ -71,12 +73,10 @@ public class IndexInfo {
          case "bt":
             return new BTreeIndex(idxname,sch,tx);
          case "eh":
-            break; //TODO: this
+            return new ExtensibleHashIndex(idxname,sch,tx);
          default: //default case really should be an error, but returns a static hash index.  - CS4432
             return new HashIndex(idxname, sch, tx);
       }
-      //default case really should be an error, but returns a static hash index. - CS4432
-      return new HashIndex(idxname, sch, tx);
    }
    
    /**
