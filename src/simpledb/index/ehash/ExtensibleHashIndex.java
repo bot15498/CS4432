@@ -25,6 +25,7 @@ public class ExtensibleHashIndex implements Index {
     private TableInfo hashTbl;
     private int globalDepth = 0;
 
+    //done
     public ExtensibleHashIndex(String idxname, Schema sch, Transaction tx) {
         this.idxname = idxname;
         this.sch = sch;
@@ -34,43 +35,10 @@ public class ExtensibleHashIndex implements Index {
         Schema hashTableSch = new Schema();
         hashTableSch.addStringField("hash", MAX_HASH_SIZE);
         hashTableSch.addIntField("freeSpots");
+        hashTableSch.addIntField("localDepth");
         hashTableSch.addStringField("pointerTable", MAX_NAME);
         hashTbl = new TableInfo(hashTable, hashTableSch);
         setGlobalDepth(); //puts global depth into memory
-
-        //add first two buckets to hash index
-//        RecordFile bucket0 = new RecordFile(hashTbl, tx);
-//        bucket0.insert();
-//        bucket0.setInt("hash",0);
-//        bucket0.setInt("freeSpots", MAX_BUCKET_SIZE);
-//        bucket0.setString("pointerTable",);
-//        bucket0.close();
-//        RecordFile bucket1 = new RecordFile(hashTbl, tx);
-//        bucket0.insert();
-//        bucket0.setInt("hash",1);
-//        bucket0.setInt("freeSpots", MAX_BUCKET_SIZE);
-//        bucket0.close();
-
-        //TODO: Create table info for top level hash table
-
-        //TableInfo for buckets:
-//        String bucketTable = idxname + "bucket";
-//        bucketTi = new TableInfo(bucketTable, sch);
-//        if (tx.size(bucketTi.fileName()) == 0) {
-//            tx.append(bucketTi.fileName(), new EHashPageFormatter(bucketTi, -1)); //initialize all pages to be empty
-//        }
-
-        //Table info for upper level hash table.
-//        String hashTable = idxname + "ehashtbl";
-//        Schema hashTableSch = new Schema();
-//        hashTableSch.add("block", sch);
-//        hashTableSch.add("dataval", sch);
-//        hashTableTi = new TableInfo(hashTable, hashTableSch);
-//        topBlock = new Block(hashTableTi.fileName(), 0);
-//        if (tx.size(hashTableTi.fileName()) == 0) {
-//            //If
-//            tx.append(hashTableTi.fileName(), new EHashPageFormatter(hashTableTi, 0));
-//        }
     }
 
     /**
@@ -78,26 +46,16 @@ public class ExtensibleHashIndex implements Index {
      *
      * @param searchkey the search key value.
      */
+    //done
     public void beforeFirst(Constant searchkey) {
         close();
         this.searchKey = searchkey;
-        //bucket = identifier to bucket
+        //get name of table that record would be in. Do this by finding hash
         String bucket = convertToHash(searchkey, globalDepth);
         String tblname = idxname + bucket;
+        //open new table scan object. If table doesn't exist, it will now.
         TableInfo ti = new TableInfo(tblname, sch);
         currTableScan = new TableScan(ti, tx);
-
-        //filter searchkey
-        searchkey.hashCode()
-
-        TableScan hashts = new TableScan(hashTbl, tx);
-        hashts.beforeFirst();
-        boolean found = false;
-        while (!found && hashts.next()) {
-            if (hashts.getVal("dataval").equals(searchkey)) {
-                found = true;
-            }
-        }
     }
 
     //done
@@ -108,11 +66,18 @@ public class ExtensibleHashIndex implements Index {
         return false;
     }
 
+    //done
     public RID getDataRid() {
-        return null;
+        int blknum = currTableScan.getInt("block");
+        int id = currTableScan.getInt("id");
+        return new RID(blknum, id);
     }
 
+    //needs split code
     public void insert(Constant dataval, RID datarid) {
+
+
+
         beforeFirst(dataval); //get to table/bucket we want
         currTableScan.insert();
         currTableScan.setInt("block", datarid.blockNumber());
@@ -125,14 +90,25 @@ public class ExtensibleHashIndex implements Index {
     public void delete(Constant dataval, RID datarid) {
         beforeFirst(dataval);
         //Only concerned with records in our currrent hash bucket because duplicates of dataval would be together
-        while(next())
+        while (next())
             if (getDataRid().equals(datarid)) {
                 currTableScan.delete();
-                return;
+                //decrement number of free space
+                TableScan hashTblScan = new TableScan(hashTbl, tx);
+                hashTblScan.beforeFirst();
+                while (hashTblScan.next()) {
+                    String bucket = convertToHash(dataval, globalDepth);
+                    String tblname = idxname + bucket;
+                    if (hashTblScan.getString("pointerTable").equals(tblname)) {
+                        int currentFreeSpace = hashTblScan.getInt("freeSpots");
+                        hashTblScan.setInt("freeSpots",currentFreeSpace - 1);
+                        return; //exit early to save time
+                    }
+                }
             }
     }
 
-    //maybe done
+    //done
     public void close() {
         if (currTableScan != null) {
             currTableScan.close();
@@ -157,12 +133,17 @@ public class ExtensibleHashIndex implements Index {
         return bucketValString;
     }
 
+    /**
+     * Scans through hash table looking for metadata on global depth.
+     * This is stored in it's own record  with a freeSpots value of the global depth
+     * and a pointerTable value of "globalDepth"
+     */
     private void setGlobalDepth() {
         //First check to see if metadata record with global depth exists.
         TableScan hashTblScan = new TableScan(hashTbl, tx);
         hashTblScan.beforeFirst();
-        while(hashTblScan.next()) {
-            if(hashTblScan.getString("pointerTable").equals("globalDepth")) {
+        while (hashTblScan.next()) {
+            if (hashTblScan.getString("pointerTable").equals("globalDepth")) {
                 globalDepth = hashTblScan.getInt("freeSpots");
                 return;
             }
@@ -170,8 +151,8 @@ public class ExtensibleHashIndex implements Index {
         //reached end of hash table without finding metadata record. This means table is new and needs one
         hashTblScan.beforeFirst();
         hashTblScan.insert();
-        hashTblScan.setInt("freeSpots",1); //set global depth to be 1
-        hashTblScan.setString("pointerTable","globalDepth");
+        hashTblScan.setInt("freeSpots", 1); //set global depth to be 1
+        hashTblScan.setString("pointerTable", "globalDepth");
         globalDepth = 1;
     }
 }
