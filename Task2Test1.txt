@@ -1,0 +1,108 @@
+new transaction: 1
+creating new database
+transaction 1 committed
+database server ready
+new transaction: 2
+transaction 2 committed
+new transaction: 3
+transaction 3 committed
+new transaction: 4
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 1
+Modify field sname to val joe
+Modify field majorid to val 10
+Index is probably being created: eh
+New index of 0 added to hash
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 20 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2004
+transaction 4 committed
+new transaction: 5
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 2
+Modify field sname to val amy
+Modify field majorid to val 20
+Index is probably being created: eh
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 19 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2004
+transaction 5 committed
+new transaction: 6
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 3
+Modify field sname to val max
+Modify field majorid to val 10
+Index is probably being created: eh
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 18 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2005
+transaction 6 committed
+new transaction: 7
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 4
+Modify field sname to val sue
+Modify field majorid to val 20
+Index is probably being created: eh
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 17 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2005
+transaction 7 committed
+new transaction: 8
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 5
+Modify field sname to val bob
+Modify field majorid to val 30
+Index is probably being created: eh
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 16 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2003
+transaction 8 committed
+new transaction: 9
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 6
+Modify field sname to val kim
+Modify field majorid to val 20
+Index is probably being created: eh
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 15 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2001
+transaction 9 committed
+new transaction: 10
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 7
+Modify field sname to val art
+Modify field majorid to val 30
+Index is probably being created: eh
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 14 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2004
+transaction 10 committed
+new transaction: 11
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 8
+Modify field sname to val pat
+Modify field majorid to val 20
+Index is probably being created: eh
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 13 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2001
+transaction 11 committed
+new transaction: 12
+Obtaining info on: btstudenttest which is a eh
+Modify field sid to val 9
+Modify field sname to val lee
+Modify field majorid to val 10
+Index is probably being created: eh
+Bucket of insert is supposed  to go to bucket 0
+inserting into ehash table where val has 12 free spots
+Total number of I/O's taken for insert: 2
+Modify field gradyear to val 2004
+transaction 12 committed

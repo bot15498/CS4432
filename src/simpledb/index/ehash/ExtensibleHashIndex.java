@@ -16,8 +16,8 @@ import static simpledb.metadata.TableMgr.MAX_NAME;
 
 public class ExtensibleHashIndex implements Index {
 
-    public static final int MAX_BUCKET_SIZE = 20;
-    public static final int MAX_HASH_SIZE = 20;
+    public static final int MAX_BUCKET_SIZE = 200;
+    public static final int MAX_HASH_SIZE = 100;
 
     private String idxname;
     private Schema sch;
@@ -52,6 +52,7 @@ public class ExtensibleHashIndex implements Index {
     //done
     public void beforeFirst(Constant searchkey) {
         close();
+        int iocount = 0;
         this.searchKey = searchkey;
         //get name of table that record would be in. Do this by finding hash
         String bucket = convertToHash(searchkey, globalDepth);
@@ -59,6 +60,7 @@ public class ExtensibleHashIndex implements Index {
         //open table scan on hash table to get actual table name
         TableScan hashTblScan = new TableScan(hashTbl, tx);
         hashTblScan.beforeFirst();
+        iocount++; //load hash into memory
         String actualTable = null;
         while (hashTblScan.next()) {
             if (hashTblScan.getString("hash").equals(bucket)) {
@@ -75,8 +77,10 @@ public class ExtensibleHashIndex implements Index {
             System.out.println("New index of " + bucket + " added to hash");
         }
         //open new table scan object. If table doesn't exist, it will now.
+        iocount++;
         currTableInfo = new TableInfo(actualTable, sch);
         currTableScan = new TableScan(currTableInfo, tx);
+        System.out.println("Total number of I/O's taken for bucket lookup: " + iocount);
     }
 
     //done
@@ -96,9 +100,10 @@ public class ExtensibleHashIndex implements Index {
 
     //needs split code
     public void insert(Constant dataval, RID datarid) {
-
+        int iocount = 0;
         //check current number of free spaces. If it is zero, we must split it (and maybe increase global depth).
         beforeFirst(dataval);
+        iocount++;
         System.out.println("Bucket of insert is supposed  to go to bucket " + convertToHash(dataval, globalDepth));
         int freeSpots = getFreeSpots(dataval);
         System.out.println("inserting into ehash table where val has " + freeSpots + " free spots");
@@ -109,6 +114,7 @@ public class ExtensibleHashIndex implements Index {
             currTableScan.setInt("id", datarid.id());
             currTableScan.setVal("dataval", dataval);
             decrementFreeSpots(dataval);
+            iocount++;
         } else { //split case
             //methodology: check if global depth needs to be increased,
             // save records in memory, edit all hash records that relate to the bucket (increase local depths),
@@ -117,7 +123,7 @@ public class ExtensibleHashIndex implements Index {
             //Notes: Always split into two
 
             //if we need to increase global depth, duplicate all hash entries and have them point to table.
-            if (getLocalDepth(dataval) == globalDepth) { //need to split
+            if (getLocalDepth(dataval) == globalDepth) { //need to split. Doesn't count as I/O because hash table should already be in memory
                 setGlobalDepth(globalDepth + 1);
                 TableScan hashTblScan = new TableScan(hashTbl, tx);
                 hashTblScan.beforeFirst();
@@ -138,17 +144,18 @@ public class ExtensibleHashIndex implements Index {
                     hashTblScan.setInt("freeSpots", record.getRecFreeSpots());
                     hashTblScan.setInt("localDepth", record.getRecLocalDepth());
                     hashTblScan.setString("pointerTable", record.getRecPointerTable());
-                    System.out.println("Just created new bucket of " + hashTblScan.getString("hash") + "because of splitting");
+                    System.out.println("Just created new bucket of " + hashTblScan.getString("hash") + "because of splitting due to global depth increasing");
                     hashTblScan.insert();
                     hashTblScan.setString("hash", "1" + record.getRecHash());
                     hashTblScan.setInt("freeSpots", record.getRecFreeSpots());
                     hashTblScan.setInt("localDepth", record.getRecLocalDepth());
                     hashTblScan.setString("pointerTable", record.getRecPointerTable());
-                    System.out.println("Just created new bucket of " + hashTblScan.getString("hash") + "because of splitting");
+                    System.out.println("Just created new bucket of " + hashTblScan.getString("hash") + "because of splitting due to global depth increasing");
                 }
             }
             //save records in memory for easy inserting
             beforeFirst(dataval);
+            iocount++;
             ArrayList<ExtensibleHashBucketRecord> records = new ArrayList<ExtensibleHashBucketRecord>();
             currTableScan.beforeFirst();
             while (currTableScan.next()) {
@@ -175,6 +182,7 @@ public class ExtensibleHashIndex implements Index {
                     hashTblScan.setInt("localDepth", localDepth + 1);
                     hashTblScan.setInt("freeSpots", MAX_BUCKET_SIZE);
                     System.out.println("Changing bucket from " + tempPointer + " to " + addition + tempPointer);
+                    iocount++;
                 }
             }
             //iterate through records and insert them (this function)
@@ -196,19 +204,23 @@ public class ExtensibleHashIndex implements Index {
 //            decrementFreeSpots(dataval);
             insert(dataval, datarid);
         }
-
+        System.out.println("Total number of I/O's taken for insert: " + iocount);
     }
 
     //done
     public void delete(Constant dataval, RID datarid) {
+        int iocount = 0;
         beforeFirst(dataval);
+        iocount += 2; //2 for loading hash table and then loading bucket
         //Only concerned with records in our currrent hash bucket because duplicates of dataval would be together
-        while (next())
+        while (next()) {
             if (getDataRid().equals(datarid)) {
                 currTableScan.delete();
                 //increase number of free space
                 incrementFreeSpots(dataval);
             }
+        }
+        System.out.println("Total number of I/O's taken for insert: " + iocount);
     }
 
     //done

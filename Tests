@@ -1,0 +1,10 @@
+Task 2:
+Test1: Working Extensible Hash Index
+Ouput: Task2Test1.txt
+This is the output of creating an extensible Hash Index and inserting data into it. The index class prints to std out
+when buckets are being split or when the global depth is being increased. The index also prints how how many free slots
+are in a bucket before trying to split it. This is 0 every time. For this test, the max amount of records  allowed in
+a bucket was 20. The index was tested on by indexing the students table in the CreateStudentDB java file in
+studentClient/simpledb/ of the project folder.
+The main methodology for how the extensible hash index is structured can be found in the main writeup.
+

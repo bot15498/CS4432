@@ -1,13 +1,10 @@
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Random;
 
 import simpledb.remote.SimpleDriver;
 
 public class CreateTestTables {
-    final static int maxSize = 20000;
+    final static int maxSize = 4000;
 
     /**
      * @param args
@@ -48,22 +45,49 @@ public class CreateTestTables {
                     "  a2 int" +
                     ")");
 
+            //test 4 table is the no index one
             s.executeUpdate("create sh index idx1 on test1 (a1)");
-            s.executeUpdate("create ex index idx2 on test2 (a1)");
+            s.executeUpdate("create eh index idx2 on test2 (a1)");
             s.executeUpdate("create bt index idx3 on test3 (a1)");
             for (int i = 1; i < 6; i++) {
                 if (i != 5) {
                     rand = new Random(1);// ensure every table gets the same data
                     for (int j = 0; j < maxSize; j++) {
                         s.executeUpdate("insert into test" + i + " (a1,a2) values(" + rand.nextInt(1000) + "," + rand.nextInt(1000) + ")");
+                        System.out.println(j);
                     }
                 } else//case where i=5
                 {
                     for (int j = 0; j < maxSize / 2; j++)// insert 10000 records into test5
                     {
                         s.executeUpdate("insert into test" + i + " (a1,a2) values(" + j + "," + j + ")");
+                        System.out.println(j);
                     }
                 }
+            }
+
+            for(int i=1;i<5;i++) {
+                rand = new Random(1);
+                long startTime = System.nanoTime();
+                //s.executeUpdate("select a1,a2 from test" + i + " where a1=" + rand.nextInt(1000));
+                qry = "select a1,a2 from test" + i + " where a1=" + rand.nextInt(5);
+                ResultSet rs = s.executeQuery(qry);
+                rs.close();
+                long endTime = System.nanoTime();
+                double timeInMillis = (endTime - startTime)/1000000;
+                System.out.println("Total time for querying test" + i + ": " + timeInMillis);
+            }
+
+            for(int i=1;i<5;i++) {
+                rand = new Random(1);
+                long startTime = System.nanoTime();
+                //s.executeUpdate("select a1,a2 from test5,test" + i + " where test5.a1=test" + i + ".a1");
+                qry = "select a1,a2 from test5,test" + i + " where a1=a1";
+                ResultSet rs = s.executeQuery(qry);
+                rs.close();
+                long endTime = System.nanoTime();
+                double timeInMillis = (endTime - startTime)/1000000;
+                System.out.println("Total time for joining test5 with test" + i + ": " + timeInMillis);
             }
             conn.close();
 

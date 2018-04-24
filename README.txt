@@ -6,9 +6,6 @@ Task 1:
 
 Task 2:
 -static hash and B-Tree already exist
--
--TableInfo for "hash" part of index
--New class for each bucket. Bucket's hold a table scan.
 
 Methodology for EHash:
 -Store buckets as own tables with name of hahsed value.
@@ -18,3 +15,4 @@ Methodology for EHash:
 --holds names of tables (as a pointer)
 ASSUMPTIONS:
 -Max bucket size is greater than number of duplicates possible.
+
